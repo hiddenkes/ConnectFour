@@ -1,0 +1,52 @@
+@media only screen and (min-width : 1448px) {
+	
+	#board {
+		width: 1300px;
+	}
+	
+	.columns {
+		width: 1200px;
+	}
+	
+	.column {
+		height: 1000px;
+		width: 160px;
+		/* TODO: Change Margin? */
+		margin: 5px;
+	}
+	
+	.waiter {
+		width: 0px;
+		height: 0px;
+		overflow: visible;
+	}
+	
+	.piece {
+		display: block;
+		width: 140px;
+		height: 140px;
+		border-radius: 100px;
+		background-color: white;
+		margin: 10px;
+	}
+	
+	.playerOne {
+		background: red;
+		display: block;
+		width: 140px;
+		height: 140px;
+		border-radius: 100px;
+		margin: 0px;
+	}
+	
+	.playerTwo {
+		background: blue;
+		display: block;
+		width: 140px;
+		height: 140px;
+		border-radius: 100px;
+		margin: 0px;
+		position: relative;
+	}
+
+}
