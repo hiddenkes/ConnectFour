@@ -1,70 +1,3 @@
-function isVictory(pieces, placedX, placedY) {
-  var i, j, x, y, maxX, maxY, steps, count = 0,
-    directions = [
-      { x: 0, y: 1  }, // North-South
-      { x: 1, y: 0  }, // East-West
-      { x: 1, y: 1  }, // Northeast-Southwest
-      { x: 1, y: -1 }  // Southeast-Northwest
-    ];
-    
-  // Check all directions
-  outerloop:
-  for (i = 0; i < directions.length; i++, count = 0) {
-    // Set up bounds to go 3 pieces forward and backward
-    x =     Math.min(Math.max(placedX - (3 * directions[i].x), 0), pieces.length    - 1);
-    y =     Math.min(Math.max(placedY - (3 * directions[i].y), 0), pieces[0].length - 1);
-    maxX =  Math.max(Math.min(placedX + (3 * directions[i].x),     pieces.length    - 1), 0);
-    maxY =  Math.max(Math.min(placedY + (3 * directions[i].y),     pieces[0].length - 1), 0);
-    steps = Math.max(Math.abs(maxX - x), Math.abs(maxY - y));
-    
-    for (j = 0; j < steps; j++, x += directions[i].x, y += directions[i].y) {
-      if (pieces[x][y] == pieces[placedX][placedY]) {
-        // Increase count
-        if (++count >= 4) {
-          break outerloop;
-        }
-      } else {
-        // Reset count
-        count = 0;
-      }
-    }
-  }
-  
-  return count >= 4;
-}
-
-// Keep in mind that these board are technically "sideways"
-var testVertical = [
-    [1, 1, 1, 0, 0, 0],
-    [1, 2, 2, 2, 2, 1], // Last placed piece is the last "2" [1][4]
-    [2, 1, 2, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0]
-];
-
-var testDiagonal = [
-    [1, 1, 1, 2, 2, 0],
-    [1, 1, 2, 1, 2, 0],
-    [2, 1, 2, 2, 0, 0],
-    [1, 2, 2, 0, 0, 0], // Last placed piece is the last "2" [3][2]
-    [1, 2, 0, 0, 0, 0],
-    [2, 0, 0, 0, 0, 0]
-];
-
-var testNoVictory = [
-    [1, 1, 1, 2, 2, 0],
-    [1, 1, 1, 1, 2, 0],
-    [2, 1, 2, 1, 0, 0],
-    [1, 2, 2, 0, 0, 0], // Last placed piece is the last "2" [3][2]
-    [2, 2, 0, 0, 0, 0],
-    [2, 0, 0, 0, 0, 0]
-];
-
-document.write('Vertical Win: ' + (isVictory(testVertical, 1, 4) ? "You win!" : "Not yet") + "<br />");
-document.write('Diagonal Win: ' + (isVictory(testDiagonal, 3, 2) ? "You win!" : "Not yet") + "<br />");
-document.write('No Victory: ' + (isVictory(testNoVictory, 3, 2) ? "You win!" : "Not yet") + "<br />");
-
 function deepCopy(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -102,8 +35,6 @@ App.prototype = {
 	    [0, 0, 0, 0, 0, 0]
 	],
 	
-	columns: [],
-	
 	drawBoard: function(){
 		
 		var table = $("<table>");
@@ -120,7 +51,7 @@ App.prototype = {
 			}
 			table.append(tr);
 		}
-		$(document.body).append(table);
+		$("#main").html(table);
 		
 		function remap(from){
 			return ([5,4,3,2,1,0])[from];
@@ -129,32 +60,60 @@ App.prototype = {
 		for(var i = 0; i < 6; i++){
 			for(var j = 0; j < 7; j++){
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseover", (function(inSender){
-					var col = inSender.srcElement.getAttribute("thei");
-					if(this.canDrop(col)){
-						var item = remap(this.dropOnIndex(col));
-						var hover = $(table.children()[0].childNodes[item].childNodes[col]);
-						hover.addClass("ihover");
+					if(!this.blocked && !this.winner){
+						var col = inSender.srcElement.getAttribute("thei");
+						if(this.canDrop(col)){
+							var item = remap(this.dropOnIndex(col));
+							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
+							hover.addClass("ihover");
+							hover.addClass(this.player === 1 ? "one" : "two");
+						}
 					}
 				}).bind(this));
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseout", (function(inSender){
-					var col = inSender.srcElement.getAttribute("thei");
-					if(this.canDrop(col)){
-						var item = remap(this.dropOnIndex(col));
-						var hover = $(table.children()[0].childNodes[item].childNodes[col]);
-						hover.removeClass("ihover");
+					if(!this.blocked && !this.winner){
+						var col = inSender.srcElement.getAttribute("thei");
+						if(this.canDrop(col)){
+							var item = remap(this.dropOnIndex(col));
+							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
+							hover.removeClass("ihover");
+							hover.removeClass("one");
+							hover.removeClass("two");
+						}
 					}
 				}).bind(this));
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("click", (function(inSender){
-					var col = inSender.srcElement.getAttribute("thei");
-					if(this.canDrop(col)){
-						this.uiDrop(col, (function(){
-							//Computer's turn, mother fucker:
-							this.doComputer();
-						}).bind(this));
+					if(!this.blocked && !this.winner){
+						var col = inSender.srcElement.getAttribute("thei");
+						if(this.canDrop(col)){
+							this.block(true);
+							this.uiDrop(col, (function(){
+								//Computer's turn, mother fucker:
+								this.doComputer();
+							}).bind(this));
+						}
 					}
 				}).bind(this));
 			}
 		}
+	},
+	
+	reset: function(){
+		this.player = 1;
+		this.board =  [
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0],
+		    [0, 0, 0, 0, 0, 0]
+		];
+		this.columns = [];
+		this.winner = false;
+		this.stale = false;
+		this.block(false);
+		this.drawBoard();
 	},
 	
 	//Drops a piece in the board, and adds the UI to match:
@@ -175,14 +134,18 @@ App.prototype = {
 			this.drop(col);
 			piece.animate({
 				top: "0"
-			}, 700, "easeOutBounce", function(){
-				callback();
-			})
+			}, 700, "easeOutBounce", (function(){
+				if(this.winner){
+					this.playerWon();
+				}else if(callback){
+					callback();
+				}
+			}).bind(this))
 		}
 	},
 	
 	block: function(direction){
-		
+		this.blocked = direction;
 	},
 	
 	doComputer: function(){
@@ -193,11 +156,12 @@ App.prototype = {
 		//Generate the best move:
 		var ai = new AI(this);
 		//Drop the best move:
-		this.uiDrop(ai.bestMove);
-		//Change player back to user:
-		this.flipPlayer();
-		//Unblock user interaction with the UI:
-		this.block(false);
+		this.uiDrop(ai.bestMove, (function(){
+			//Change player back to user:
+			this.flipPlayer();
+			//Unblock user interaction with the UI:
+			this.block(false);
+		}).bind(this));
 	},
 	
 	canDrop: function(column, board){
@@ -224,9 +188,24 @@ App.prototype = {
 	drop: function(column){
 		var drop = this.simulateDrop(column);
 		this.board = drop.board;
-		
+		if(this.isVictory(drop.board, drop.x, drop.y)){
+			this.winner = true;
+		}else if(this.isStalemate(drop.board)){
+			this.winner = true;
+			this.stale = true;
+		}
 		return drop;
 	},
+	
+	playerWon: function(){
+		if(this.stale){
+			alert("Game was a stalemate.");
+		}else{
+			alert("Player " + this.player + " Won!");
+		}
+		this.reset();
+	},
+	
 	flipPlayer: function(){
 		if(this.player === 1){
 			this.player = 2;
@@ -235,39 +214,102 @@ App.prototype = {
 		}
 		return this.player;
 	},
-	isVictory: function(pieces, placedX, placedY) {
-		var i, j, x, y, maxX, maxY, steps, count = 0,
-		directions = [
-			{ x: 0, y: 1 }, // North-South
-			{ x: 1, y: 0 }, // East-West
-			{ x: 1, y: 1 }, // Northeast-Southwest
-			{ x: 1, y: -1 }  // Southeast-Northwest
-		];
-		outerloop:
-		for (i = 0; i < directions.length; i++, count = 0) {
-			// Set up bounds to go 3 pieces forward and backward
-			x = Math.min(Math.max(placedX - (3 * directions[i].x), 0), pieces.length - 1);
-			y = Math.min(Math.max(placedY - (3 * directions[i].y), 0), pieces[0].length - 1);
-			maxX = Math.max(Math.min(placedX + (3 * directions[i].x), pieces.length - 1), 0);
-			maxY = Math.max(Math.min(placedY + (3 * directions[i].y), pieces[0].length - 1), 0);
-			steps = Math.max(Math.abs(maxX - x), Math.abs(maxY - y));
-			
-			for (j = 0; j < steps; j++, x += directions[i].x, y += directions[i].y) {
-				if (pieces[x] && pieces[placedX] && (pieces[x][y] == pieces[placedX][placedY])) {
-			    	// Increase count
-			    	if (++count >= 4) {
-			    		break outerloop;
-			    	}
-				} else {
-					// Reset count
-					count = 0;
-				}
+	isStalemate: function(board){
+		var stale = true;
+		for(var i = 0; i < board.length; i++){
+			if(board[i].indexOf(0) > -1){
+				stale = false;
+				break;
 			}
 		}
-		  
-		return count >= 4;
+		return stale;
+	},
+	isVictory: function(pieces, placedX, placedY) {
+		return (this.inARow(pieces, placedX, placedY) >= 4)
 	},
 	inARow: function(pieces, placedX, placedY) {
+		var directions = [
+	      { x: 0, y: 1  }, // North-South
+	      { x: 1, y: 0  }, // East-West
+	      { x: 1, y: 1  }, // Northeast-Southwest
+	      { x: 1, y: -1 }  // Southeast-Northwest
+	    ];
+	    
+	    var us = pieces[placedX][placedY];
+	    
+	    var counts = [];
+	    
+	    for(i = 0; i < directions.length; i++){
+	    	//Easier reference to the direction:
+	    	var dir = directions[i];
+	    	//Count in a row:
+	    	var count = 1;
+	    	//One-way flags to stop directional searching when a conflict has been found
+	    	var pos = true;
+	    	var neg = true;
+	    	//Loop though four levels
+	    	for(var j = 1; j < 5; j++){
+	    		if(pos){
+	    			var x = placedX + (dir.x * j);
+	    			var y = placedY + (dir.y * j);
+	    			if(pieces[x] && pieces[x][y] && pieces[x][y] === us){
+	    				count++;
+	    			}else{
+	    				pos = false;
+	    			}
+	    		}
+	    		if(neg){
+	    			var x = placedX + (-1*(dir.x * j));
+	    			var y = placedY + (-1*(dir.y * j));
+	    			if(pieces[x] && pieces[x][y] && pieces[x][y] === us){
+	    				count++;
+	    			}else{
+	    				neg = false;
+	    			}
+	    		}
+	    	}
+	    	counts.push(count);
+	    }
+	    //Most in a row:
+		return counts.sort().reverse()[0];
+	},
+	isVictoryOld: function(pieces, placedX, placedY) {
+		var i, j, x, y, maxX, maxY, steps, count = 0,
+	    directions = [
+	      { x: 0, y: 1  }, // North-South
+	      { x: 1, y: 0  }, // East-West
+	      { x: 1, y: 1  }, // Northeast-Southwest
+	      { x: 1, y: -1 }  // Southeast-Northwest
+	    ];
+	
+	  // Check all directions
+	  outerloop:
+	  for (i = 0; i < directions.length; i++, count = 0) {
+	    // Set up bounds to go 3 pieces forward and backward
+	    x =     Math.min(Math.max(placedX - (3 * directions[i].x), 0), pieces.length    - 1);
+	    y =     Math.min(Math.max(placedY - (3 * directions[i].y), 0), pieces[0].length - 1);
+	    maxX =  Math.max(Math.min(placedX + (3 * directions[i].x),     pieces.length    - 1), 0);
+	    maxY =  Math.max(Math.min(placedY + (3 * directions[i].y),     pieces[0].length - 1), 0);
+	    steps = Math.max(Math.abs(maxX - x), Math.abs(maxY - y));
+	    steps = 10;
+	
+	    for (j = 0; j < steps; j++, x += directions[i].x, y += directions[i].y) {
+	    	if(pieces[x] && pieces[placedX]){
+		      if (pieces[x][y] == pieces[placedX][placedY]) {
+		        // Increase count
+		        if (++count >= 4) {
+		          break outerloop;
+		        }
+		      } else {
+		        // Reset count
+		        count = 0;
+		      }
+		    }
+	    }
+	  }
+	  return count >= 4;
+	},
+	inARowOld: function(pieces, placedX, placedY) {
 		var i, j, x, y, maxX, maxY, steps, count = 0,
 		directions = [
 			{ x: 0, y: 1  }, // North-South
