@@ -25,6 +25,10 @@ App.prototype = {
 	//The current player. 1 is user, 2 is AI.
 	player: 0,
 	
+	twoplayer: false,
+	
+	difficulty: "normal",
+	
 	board: [
 	    [0, 0, 0, 0, 0, 0],
 	    [0, 0, 0, 0, 0, 0],
@@ -62,6 +66,7 @@ App.prototype = {
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseover", (function(inSender){
 					if(!this.blocked && !this.winner){
 						var col = inSender.srcElement.getAttribute("thei");
+						col = parseInt(col);
 						if(this.canDrop(col)){
 							var item = remap(this.dropOnIndex(col));
 							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
@@ -73,6 +78,7 @@ App.prototype = {
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseout", (function(inSender){
 					if(!this.blocked && !this.winner){
 						var col = inSender.srcElement.getAttribute("thei");
+						col = parseInt(col);
 						if(this.canDrop(col)){
 							var item = remap(this.dropOnIndex(col));
 							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
@@ -85,11 +91,17 @@ App.prototype = {
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("click", (function(inSender){
 					if(!this.blocked && !this.winner){
 						var col = inSender.srcElement.getAttribute("thei");
+						col = parseInt(col);
 						if(this.canDrop(col)){
 							this.block(true);
 							this.uiDrop(col, (function(){
-								//Computer's turn, mother fucker:
-								this.doComputer();
+								if(!this.twoplayer){
+									//Computer's turn, mother fucker:
+									this.doComputer();
+								}else{
+									this.flipPlayer();
+									this.block(false);
+								}
 							}).bind(this));
 						}
 					}
@@ -99,6 +111,7 @@ App.prototype = {
 	},
 	
 	reset: function(){
+		//TODO: Animate the pieces out?
 		this.player = 1;
 		this.board =  [
 		    [0, 0, 0, 0, 0, 0],
@@ -112,8 +125,18 @@ App.prototype = {
 		this.columns = [];
 		this.winner = false;
 		this.stale = false;
-		this.block(false);
-		this.drawBoard();
+		this.block(true);
+				
+		//Animate checker pieces out:
+		$(".playerPiece").each(function(id, el){
+			$(this).animate({
+				top: "-1000px"
+			}, Math.round(800 + Math.random() * 500), "easeInCirc");
+		});
+		window.setTimeout((function(){
+			this.block(false);
+			this.drawBoard();
+		}).bind(this), 1300);
 	},
 	
 	//Drops a piece in the board, and adds the UI to match:
@@ -125,10 +148,14 @@ App.prototype = {
 			var item = remap(this.dropOnIndex(col));
 			var drop = $($("#eltable").children()[0].childNodes[item].childNodes[col]);
 			var piece = $("<div>");
+			piece.addClass("playerPiece");
 			piece.addClass(this.player === 1 ? "playerOne" : "playerTwo");
 			piece.css("top", "-1000px");
 			piece.css("top", "-500px");
 			piece.css("top", "-700px");
+			
+			piece.css("top", "-" + (item * 100 + 100) + "px");
+			
 			drop.append(piece);
 			drop.removeClass("ihover");
 			this.drop(col);
@@ -154,13 +181,23 @@ App.prototype = {
 		//Change player to the AI:
 		this.flipPlayer();
 		//Generate the best move:
-		var ai = new AI(this);
+		var ai;
+		if(this.difficulty === "hard"){
+			ai = new RecursiveAI(this);
+		}else{
+			ai = new AI(this);
+		}
 		//Drop the best move:
 		this.uiDrop(ai.bestMove, (function(){
-			//Change player back to user:
-			this.flipPlayer();
-			//Unblock user interaction with the UI:
-			this.block(false);
+			//COMPUTER VS COMPUTER:
+			if(this.twoplayer && this.twoplayer === "computer"){
+				this.doComputer();
+			}else{
+				//Change player back to user:
+				this.flipPlayer();
+				//Unblock user interaction with the UI:
+				this.block(false);
+			}
 		}).bind(this));
 	},
 	
@@ -228,6 +265,11 @@ App.prototype = {
 		return (this.inARow(pieces, placedX, placedY) >= 4)
 	},
 	inARow: function(pieces, placedX, placedY) {
+		
+		//Make sure we're using integers. Other things mess up royally. 
+		placedX = parseInt(placedX);
+		placedY = parseInt(placedY);
+		
 		var directions = [
 	      { x: 0, y: 1  }, // North-South
 	      { x: 1, y: 0  }, // East-West
@@ -272,41 +314,5 @@ App.prototype = {
 	    }
 	    //Most in a row:
 		return counts.sort().reverse()[0];
-	}
-}
-
-function AI(game){
-	//create reference to the game calling us:
-	this.parent = game;
-	//Copy the board:
-	this.board = deepCopy(this.parent.board);
-	this.bestMove = this.findBestMove();
-}
-AI.prototype = {
-	findBestMove: function(){
-		this.bestMoves = this.calculateMoves();
-		return this.bestMoves.indexOf(Math.max.apply(this, this.bestMoves));
-	},
-	calculateMoves: function(){
-		var bestMoves = [0, 0, 0, 0, 0, 0, 0];
-		
-		for(var i = 0; i < 7; i++){
-			if(this.parent.canDrop(i)){
-				var simdrop2 = this.parent.simulateDrop(i, this.board, 2);
-				var simdrop1 = this.parent.simulateDrop(i, this.board, 1);
-				if(this.parent.isVictory(simdrop2.board, simdrop2.x, simdrop2.y)){
-					//NOTE: We could return here, because this is always the best move. But we wont.
-					bestMoves[i] += 1000;
-				}
-				if(this.parent.isVictory(simdrop1.board, simdrop1.x, simdrop1.y)){
-					bestMoves[i] += 100;
-				}
-				var row = this.parent.inARow(simdrop2.board, simdrop2.x, simdrop2.y)
-				bestMoves[i] += row;
-				var row = this.parent.inARow(simdrop1.board, simdrop1.x, simdrop1.y)
-				bestMoves[i] += row/2;
-			}
-		}
-		return bestMoves;
 	}
 }

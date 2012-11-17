@@ -1,18 +1,19 @@
 
-function AI2(game){
+function RecursiveAI(game){
 	//create reference to the game calling us:
 	this.parent = game;
 	//Copy the board:
 	this.board = deepCopy(this.parent.board);
-	console.log(this);
 	this.bestMove = this.findBestMove();
 	return this.bestMove;
 }
-AI2.prototype = {
+RecursiveAI.prototype = {
 	findBestMove: function(){
 		var bestMoves = [0, 0, 0, 0, 0, 0, 0];
-		this.bestMoves = this.calculateMoves(this.board, bestMoves, 4, 1, 2);
+		this.bestMoves = this.calculateMoves(this.board, bestMoves, 7, 1, this.parent.player);
 		return this.bestMoves.indexOf(Math.max.apply(this, this.bestMoves));
+		
+		//TODO: If there are multiple drops with the same value, randomize which one is chosen.
 	},
 	calculateMoves: function(board, bestMoves, depth, layer, player){
 		var bm = [0, 0, 0, 0, 0, 0, 0];
@@ -22,6 +23,8 @@ AI2.prototype = {
 			return bestMoves;
 		}
 		
+		var neg = (player !== this.parent.player ? -1 : 1);
+		
 		var otherPlayer;
 		player === 1 ? otherPlayer = 2 : otherPlayer = 1;
 		for(var i = 0; i < 7; i++){
@@ -30,19 +33,18 @@ AI2.prototype = {
 				var simdrop1 = this.parent.simulateDrop(i, board, otherPlayer);
 				if(this.parent.isVictory(simdrop2.board, simdrop2.x, simdrop2.y)){
 					//NOTE: We could return here, because this is always the best move. But we wont. Because fuck you I'm a bus
-					bm[i] += (1000/layer);
+					bm[i] += (neg) * (1000/layer);
 				}
 				if(this.parent.isVictory(simdrop1.board, simdrop1.x, simdrop1.y)){
 					bm[i] += (100/layer);
 				}
 				var row = this.parent.inARow(simdrop2.board, simdrop2.x, simdrop2.y)
-				bm[i] += (row/layer);
+				bm[i] += (neg) * (row/layer);
 				var row = this.parent.inARow(simdrop1.board, simdrop1.x, simdrop1.y)
 				bm[i] += ((row/2)/layer);
 			}
 		}
 		
-		player === 1 ? player = 2 : player = 1;
 		var best = bm.indexOf(Math.max.apply(this, bm));
 		board = this.parent.simulateDrop(best, board, player).board;
 		
@@ -50,6 +52,14 @@ AI2.prototype = {
 			bestMoves[j] += bm[j];
 		}
 		
-		return this.calculateMoves(board, bestMoves, depth, layer+1, player);
+		for(var j = 0; j < 7; j++){
+			//Win:
+			if(bestMoves[j] >= 1000){
+				return bestMoves;
+			}
+		}
+		
+		player === 1 ? player = 2 : player = 1;
+		return this.calculateMoves(board, bestMoves, depth, layer+2, player);
 	}
 }
