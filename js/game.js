@@ -36,13 +36,18 @@ function App(){
 	
 	//Add the event listener for the "New Game" button on the winner page:
 	document.getElementById("newGameWinner").addEventListener("click", this.reset.bind(this), false);
+
+	//Unit testing for 
+	if(this.twoplayer === "computer"){
+		this.doComputer();
+	}
 }
 
 App.prototype = {
 	//The current player. 1 is user, 2 is AI. Zero initially. We can actually set who goes first.
 	player: 0,
 	
-	twoplayer: "normal",
+	twoplayer: false,
 	
 	difficulty: "extreme",
 	
@@ -84,54 +89,56 @@ App.prototype = {
 		function remap(from){
 			return ([5,4,3,2,1,0])[from];
 		}
+
+		var that = this;
 		
 		for(var i = 0; i < 6; i++){
 			for(var j = 0; j < 7; j++){
 				//iterate over the child nodes and add our event listeners.
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseover", (function(inSender){
-					if(!this.blocked && !this.winner){
-						var col = inSender.srcElement.getAttribute("thei");
+					if(!that.blocked && !that.winner){
+						var col = $(this).attr("thei");
 						col = parseInt(col);
-						if(this.canDrop(col)){
-							var item = remap(this.dropOnIndex(col));
+						if(that.canDrop(col)){
+							var item = remap(that.dropOnIndex(col));
 							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
 							hover.addClass("ihover");
-							hover.addClass(this.player === 1 ? "one" : "two");
-							hover.addClass(this.theme);
+							hover.addClass(that.player === 1 ? "one" : "two");
+							hover.addClass(that.theme);
 						}
 					}
-				}).bind(this));
+				}));
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("mouseout", (function(inSender){
-					if(!this.blocked && !this.winner){
-						var col = inSender.srcElement.getAttribute("thei");
+					if(!that.blocked && !that.winner){
+						var col = $(this).attr("thei");
 						col = parseInt(col);
-						if(this.canDrop(col)){
-							var item = remap(this.dropOnIndex(col));
+						if(that.canDrop(col)){
+							var item = remap(that.dropOnIndex(col));
 							var hover = $(table.children()[0].childNodes[item].childNodes[col]);
 							hover.removeClass("ihover");
 							hover.removeClass("one");
 							hover.removeClass("two");
 						}
 					}
-				}).bind(this));
+				}));
 				(table.children()[0].childNodes[i].childNodes[j]).addEventListener("click", (function(inSender){
-					if(!this.blocked && !this.winner){
-						var col = inSender.srcElement.getAttribute("thei");
+					if(!that.blocked && !that.winner){
+						var col = $(this).attr("thei");
 						col = parseInt(col);
-						if(this.canDrop(col)){
-							this.block(true);
-							this.uiDrop(col, (function(){
-								if(!this.twoplayer){
+						if(that.canDrop(col)){
+							that.block(true);
+							that.uiDrop(col, (function(){
+								if(!that.twoplayer){
 									//Computer's turn, mother fucker:
-									this.doComputer();
+									that.doComputer();
 								}else{
-									this.flipPlayer();
-									this.block(false);
+									that.flipPlayer();
+									that.block(false);
 								}
-							}).bind(this));
+							}));
 						}
 					}
-				}).bind(this));
+				}));
 			}
 		}
 	},
@@ -147,7 +154,6 @@ App.prototype = {
 		    [0, 0, 0, 0, 0, 0],
 		    [0, 0, 0, 0, 0, 0]
 		];
-		this.columns = [];
 		this.winner = false;
 		this.stale = false;
 		this.block(true);
@@ -159,6 +165,7 @@ App.prototype = {
 				top: "-1000px"
 			}, Math.round(800 + Math.random() * 500), "easeInCirc");
 		});
+
 		//Redraw the board after every piece has been animated out, which at max is 1300 milliseconds
 		window.setTimeout((function(){
 			this.block(false);

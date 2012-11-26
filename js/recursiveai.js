@@ -9,6 +9,15 @@ function RecursiveAI(game){
 }
 RecursiveAI.prototype = {
 	findBestMove: function(){
+		//Quick utility function:
+		var arrays_equal = function(a,b) { return !(a<b || b<a); };
+		var emptyboard = [[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0]];
+		
+		if(arrays_equal(emptyboard, this.board)){
+			//Start with a random drop:
+			return Math.round(Math.random() * 6);
+		}
+
 		var bestMoves = [0, 0, 0, 0, 0, 0, 0];
 		this.bestMoves = this.calculateMoves(this.board, bestMoves, 7, 1, this.parent.player);
 		while(this.bestMoves.indexOf(0) > -1){
@@ -18,8 +27,6 @@ RecursiveAI.prototype = {
 			this.bestMoves[this.bestMoves.indexOf(0)] = -Infinity;
 		}
 		return this.bestMoves.indexOf(Math.max.apply(this, this.bestMoves));
-		
-		//TODO: If there are multiple drops with the same value, randomize which one is chosen.
 	},
 	calculateMoves: function(board, bestMoves, depth, layer, player){
 		var bm = [0, 0, 0, 0, 0, 0, 0];
