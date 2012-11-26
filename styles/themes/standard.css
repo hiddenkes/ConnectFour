@@ -1,0 +1,40 @@
+/* 
+ * =============
+ * DEFUALT THEME
+ * =============
+ * 
+ * This theme is the fallback if the theme name doesn't exist, or if it is "standard". It's your classic connect four.
+ * Note that only the hover color, pieces, and mask can be changed.
+ * 
+ */
+.playerOne {
+	background: #bf4040;
+}
+
+.playerTwo {
+	background: #4040bf;
+}
+.ihover.one {
+	background-color: #d17676;
+}
+.ihover.two {
+	background-color: #7676d1;
+}
+.mask {
+	/* Fallback: */
+	background-image: url('../../mask.png');
+	/* We use vector graphics for the mask because it lets us scale without distortion. */
+	background-image: url('../../mask.svg');
+	background-size: 100px 100px;
+	height: 100px;
+	width: 100px;
+	pointer-events: none;
+	position: absolute; 
+	top: 0px;
+	left: 0px;
+	z-index: 1000;
+}
+
+#eltable {
+	box-shadow:0 2px 16px rgba(0,0,0,0.5);
+}

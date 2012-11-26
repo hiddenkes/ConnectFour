@@ -4,13 +4,11 @@
     <meta charset="utf-8" />
     <title>Connect Four</title>
 
-    <!-- WinJS references -->
-    <link href="//Microsoft.WinJS.1.0/css/ui-dark.css" rel="stylesheet" />
-    
     <link href="styles/main.css" rel="stylesheet" />
     
-    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
-    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+	<link href="styles/themes/standard.css" rel="stylesheet" />
+	<link href="styles/themes/gray.css" rel="stylesheet" />
+	<link href="styles/themes/dark.css" rel="stylesheet" />
 	
 	<script src="js/jquery.js"></script>
 	<script src="js/easing.js"></script>
@@ -19,33 +17,33 @@
 	<script src="js/ai.js"></script>
 	<script src="js/recursiveai.js"></script>
 	
-    <script>
+	<script>
     	window.onload = function(){
     		window.app = new App();
     	}
     </script>
 </head>
 <body>
-	
-	<div id="main">
-		
-	</div>
-	
-	<div style="position: fixed; top: 0; right: 0;">
-		<h3>CONSOLE</h3>
-		<input id="console" /><button id="sumconsole">Evaluate</button>
-		<script>
-			$("#sumconsole").click(function(){
-				eval($("#console").val());
-				$("#console").val("");
-			});
-			$("#console").keyup(function(e){
-				if(e.keyCode === 13){
-					eval($("#console").val());
-					$("#console").val("");
-				}
-			});
-		</script>
+    <div id="host" class="stripes angled">
+		<div id="masker" class="masker">
+			<!-- The content that will be loaded and displayed. -->
+			<div class="fragment homepage">
+				<div id="main">
+					
+					<div id="winner" class="winner">
+						<div id="winenrText" class="title"></div>
+						<div id="detailsText" class="details"></div>
+						<div class="startNew">
+							<button id="newGameWinner">New Game</button>
+						</div>
+					</div>
+					<div id="gameboard">
+						
+					</div>
+					
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

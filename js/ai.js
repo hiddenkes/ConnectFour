@@ -16,6 +16,10 @@ AI.prototype = {
 				possible.push(i);
 			}
 		}
+		if(this.difficulty === "hard"){
+			//On hard difficulty, always use the best move that the AI determines. 
+			return this.bestMoves.indexOf(Math.max.apply(this, this.bestMoves));
+		}
 		if(this.difficulty === "normal"){
 			//On normal difficulty, use the best move 80% of the time.
 			if(Math.random() > 0.2){

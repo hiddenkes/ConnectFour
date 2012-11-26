@@ -11,6 +11,12 @@ RecursiveAI.prototype = {
 	findBestMove: function(){
 		var bestMoves = [0, 0, 0, 0, 0, 0, 0];
 		this.bestMoves = this.calculateMoves(this.board, bestMoves, 7, 1, this.parent.player);
+		while(this.bestMoves.indexOf(0) > -1){
+			//We always have to play. Sometimes, the recursive AI will return a move that is impossible to play as technically the highest value (all other values being negative).
+			//This drops the non-playable values to negative infinity, which will always be lower than the other numbers.
+			//Yes, it's a hack. But yes, it works.
+			this.bestMoves[this.bestMoves.indexOf(0)] = -Infinity;
+		}
 		return this.bestMoves.indexOf(Math.max.apply(this, this.bestMoves));
 		
 		//TODO: If there are multiple drops with the same value, randomize which one is chosen.
@@ -36,12 +42,12 @@ RecursiveAI.prototype = {
 					bm[i] += (neg) * (1000/layer);
 				}
 				if(this.parent.isVictory(simdrop1.board, simdrop1.x, simdrop1.y)){
-					bm[i] += (100/layer);
+					bm[i] += (neg) * (100/layer);
 				}
 				var row = this.parent.inARow(simdrop2.board, simdrop2.x, simdrop2.y)
 				bm[i] += (neg) * (row/layer);
 				var row = this.parent.inARow(simdrop1.board, simdrop1.x, simdrop1.y)
-				bm[i] += ((row/2)/layer);
+				bm[i] += (neg) * ((row/2)/layer);
 			}
 		}
 		

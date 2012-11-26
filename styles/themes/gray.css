@@ -1,0 +1,22 @@
+/* 
+ * 
+ * Gray Theme
+ * 
+ * Uses just shades of gray. There's a joke to be made there.
+ * 
+ */
+
+.playerOne.gray {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.playerTwo.gray {
+	background: rgba(0, 0, 0, 0.9);
+}
+
+.ihover.one.gray {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+.ihover.two.gray {
+	background-color: rgba(0, 0, 0, 0.7);
+}
