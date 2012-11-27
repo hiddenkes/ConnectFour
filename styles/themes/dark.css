@@ -17,11 +17,13 @@
 }
 
 .playerOne.dark {
-	background: rgba(104, 19, 17, 1);
+	/*background: rgba(104, 19, 17, 1);*/
+	background-color: #E83C3C;
 }
 
 .playerTwo.dark {
-	background: rgba(18, 13, 104, 1);
+	/*background: rgba(18, 13, 104, 1);*/
+	background-color: #3C5CE8;
 }
 
 .ihover.one.dark {

@@ -29,7 +29,8 @@
 	height: 100px;
 	width: 100px;
 	pointer-events: none;
-	position: absolute; 
+	position: absolute;
+	display: block;
 	top: 0px;
 	left: 0px;
 	z-index: 1000;

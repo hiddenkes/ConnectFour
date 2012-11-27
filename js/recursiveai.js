@@ -1,3 +1,8 @@
+//TODO: If we want, change the layer adder back to 2.
+//This AI runs into the problem that it won't always block moves, which it really should.
+//Returning when we're above 100 works, but it hasn't been tested like it should.
+
+//Basically, have Kyle try it the way it is, then with layer adder back to 2, then with a return at 100.
 
 function RecursiveAI(game){
 	//create reference to the game calling us:
@@ -45,7 +50,6 @@ RecursiveAI.prototype = {
 				var simdrop2 = this.parent.simulateDrop(i, board, player);
 				var simdrop1 = this.parent.simulateDrop(i, board, otherPlayer);
 				if(this.parent.isVictory(simdrop2.board, simdrop2.x, simdrop2.y)){
-					//NOTE: We could return here, because this is always the best move. But we wont. Because fuck you I'm a bus
 					bm[i] += (neg) * (1000/layer);
 				}
 				if(this.parent.isVictory(simdrop1.board, simdrop1.x, simdrop1.y)){
@@ -65,8 +69,8 @@ RecursiveAI.prototype = {
 			bestMoves[j] += bm[j];
 		}
 		
+		//TODO: We really need to prevent wins more. This tries to not set things up, but it fails sometimes.
 		for(var j = 0; j < 7; j++){
-			//Win:
 			if(bestMoves[j] >= 1000){
 				return bestMoves;
 			}
