@@ -1,13 +1,11 @@
 /*
  * TODO:
- * Change the styling on the winner overlay to something more visually appealing. Play around with covering the entire screen.
- * Maybe a radial gradient would add some spice to the winner dialog.
  * Add the two player toggler in the appmenu, along with on-the-fly difficulty changing (mid-game, even). Also add a "restart game" option.
  * Turn indicators would be nice.
  * In options, you should be able to set who goes first (Computer, You, Random).
  */
 
-
+//Utility function to clone arrays and objects.
 function deepCopy(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -343,7 +341,7 @@ App.prototype = {
 		return this.player;
 	},
 	
-	//
+	//Determines if the game is a stalemate.
 	isStalemate: function(board){
 		var stale = true;
 		for(var i = 0; i < board.length; i++){
@@ -355,12 +353,13 @@ App.prototype = {
 		return stale;
 	},
 	
-	//
+	//Checks to see if the piece just placed results in a victory.
 	isVictory: function(pieces, placedX, placedY) {
 		return (this.inARow(pieces, placedX, placedY) >= 4)
 	},
 	
-	//
+	//Looks at the piece just dropped and returns how many of the same color are in a row.
+	//This is a big part of the AI, as we simulate drops and evalute the number in a row it results in.
 	inARow: function(pieces, placedX, placedY) {
 		
 		//Make sure we're using integers. Other things mess up royally. 

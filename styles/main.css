@@ -9,10 +9,9 @@
 }
 
 .masker {
-	width: 100%;
 	height: 100%;
-	background-image: -webkit-radial-gradient(center center, circle contain, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.9) 100%); /* New WebKit syntax */  
-	background-image: -ms-radial-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 100%); 
+	background-image: -webkit-radial-gradient(center center, circle contain, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%); /* New WebKit syntax */  
+	background-image: -ms-radial-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 100%); 
 }
 
 .stripes {
@@ -43,7 +42,6 @@ body {
 }
 
 #main {
-	padding-top: 50px;
 }
 
 #eltable {
@@ -65,11 +63,14 @@ body {
 	font-weight: 100;
 }
 
+.row {
+}
+
 .winner {
 	box-sizing:border-box;
 	padding: 100px;
 	opacity: 0;
-	background: rgba(0, 0, 0, 0.5);
+	background: rgba(0, 0, 0, 0.7);
 	width: 700px;
 	height: 600px;
 	-webkit-transition: opacity 1s ease;
@@ -88,10 +89,6 @@ body {
 }
 .winner.hidden {
 	opacity: 0;
-}
-/* The "You Won!" text */
-.winner > h1 {
-	
 }
 
 .piece {
@@ -117,7 +114,9 @@ body {
 }
 
 table {
-    border-collapse: collapse;
+	/*Border shadow doesn't display on IE if we use this property. */
+    /*border-collapse: collapse;*/
+    border-spacing: 0px;
 }
 
 .item {
@@ -130,4 +129,8 @@ table {
 
 .ihover { 
 	margin: 10px;
+}
+
+#gameboard {
+	padding-top: 50px;
 }
